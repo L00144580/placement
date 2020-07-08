@@ -1,0 +1,95 @@
+int pkp_pin_peer_pubkey(SSL* ssl)
+{
+    if(NULL == ssl) return FALSE;
+
+    X509* cert = NULL;
+    FILE* fp = NULL;
+
+    int len1 = 0, len2 = 0;
+    unsigned char *buff1 = NULL, *buff2 = NULL;
+
+  
+    int ret = 0, result = FALSE;
+
+    do
+    {
+       
+        cert = SSL_get_peer_certificate(ssl);
+        if(!(cert != NULL))
+            break;
+        len1 = i2d_X509_PUBKEY(X509_get_X509_PUBKEY(cert), NULL);
+        if(!(len1 > 0))
+            break; 
+            
+        unsigned char* temp = NULL;
+
+
+        buff1 = temp = OPENSSL_malloc(len1);
+        if(!(buff1 != NULL))
+            break; 
+            
+        len2 = i2d_X509_PUBKEY(X509_get_X509_PUBKEY(cert), &temp);
+        
+        if(!((len1 == len2) && (temp != NULL) && ((temp - buff1) == len1)))
+            break; 
+            
+        fp = fopen("random-org.der", "rx");
+        if(NULL ==fp) {
+            fp = fopen("random-org.der", "r");
+
+        if(!(NULL != fp))
+            break; 
+        
+        
+        ret = fseek(fp, 0, SEEK_END);
+        if(!(0 == ret))
+            break; 
+            
+        long size = ftell(fp);
+        
+        if(!(size != -1 && size > 0 && size < 2048))
+            break; 
+            
+        ret = fseek(fp, 0, SEEK_SET);
+        if(!(0 == ret))
+            break; 
+            
+        buff2 = NULL; len2 = (int)size;
+
+        buff2 = OPENSSL_malloc(len2);
+        if(!(buff2 != NULL))
+            break; 
+            
+        ret = (int)fread(buff2, (size_t)len2, 1, fp);
+        if(!(ret == 1))
+            break;
+
+      
+        size = len1 < len2 ? len1 : len2;
+
+
+        if(len1 != (int)size || len2 != (int)size || 0 != memcmp(buff1, buff2, (size_t)size))
+            break;
+
+    
+        result = TRUE;
+
+    } while(0);
+
+    if(fp != NULL)
+        fclose(fp);
+
+ 
+    if(NULL != buff2)
+        OPENSSL_free(buff2);
+
+
+    if(NULL != buff1)
+        OPENSSL_free(buff1);
+
+ 
+    if(NULL != cert)
+        X509_free(cert);
+
+    return result;
+} 
