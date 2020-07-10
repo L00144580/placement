@@ -1,0 +1,27 @@
+There are two types of request made by a browser
+1.http
+2.https
+
+https is a secure request and is http is not a secure request.
+By using 'cURL'function to make request to web browser http &https.
+First will Make a HTTP request to Google.
+<?php
+if (isset($_POST["submit"])) {
+ $curl=curl_init();
+curl_setopt($curl,CURLOPT_URL, 'http://www.google.com/');
+curl_exec($curl);
+}
+
+?>
+
+
+Second step will make a https request to Google which is secure
+<?php
+if (isset($_POST["submit"])) {
+ $curl=curl_init();
+curl_setopt($curl,CURLOPT_URL, 'https://www.google.com/');
+curl_exec($curl);
+}
+
+?>
+
